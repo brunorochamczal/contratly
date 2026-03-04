@@ -1,0 +1,39 @@
+# render.yaml — Blueprint do Render
+# Ao conectar o repositório, o Render lê este arquivo e cria
+# automaticamente o Web Service + o banco PostgreSQL.
+#
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: contratospy
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --workers 2 --bind 0.0.0.0:$PORT --timeout 120
+    healthCheckPath: /api/auth/me
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true          # Render gera automaticamente
+      - key: DATABASE_URL
+        fromDatabase:
+          name: contratospy-db
+          property: connectionString
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      # ── E-mail (opcional — preencher no dashboard do Render) ──
+      - key: MAIL_SERVER
+        value: smtp.gmail.com
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USERNAME
+        value: ""                    # preencher no dashboard
+      - key: MAIL_PASSWORD
+        value: ""                    # preencher no dashboard
+      - key: MAIL_FROM
+        value: ""                    # preencher no dashboard
+
+databases:
+  - name: contratospy-db
+    databaseName: contratospy
+    user: contratospy_user
+    plan: free
