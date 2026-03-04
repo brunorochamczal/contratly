@@ -81,11 +81,16 @@ async function initApp() {
   document.getElementById('sidebar-username').textContent = currentUser.name;
   document.getElementById('sidebar-role').textContent = currentUser.role;
 
-  // Admin sections
-  if (currentUser.role === 'admin' || currentUser.role === 'legal') {
+  // Admin sections — somente perfil 'admin' vê Usuários e Auditoria
+  if (currentUser.role === 'admin') {
     document.getElementById('admin-section').style.display = 'block';
-    document.getElementById('nav-users').style.display = currentUser.role === 'admin' ? 'flex' : 'none';
+    document.getElementById('nav-users').style.display = 'flex';
     document.getElementById('nav-audit').style.display = 'flex';
+  } else {
+    // Garante ocultação mesmo que o HTML mude
+    document.getElementById('admin-section').style.display = 'none';
+    document.getElementById('nav-users').style.display = 'none';
+    document.getElementById('nav-audit').style.display = 'none';
   }
 
   // Load initial data
@@ -759,8 +764,96 @@ async function genReport(type) {
       html = `<div class="card"><p style="color:var(--text-secondary)">Relatório em desenvolvimento.</p></div>`;
     }
 
-    out.innerHTML = html;
+    out.innerHTML = html + `
+      <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn btn-primary" onclick="printReport()">
+          🖨️ Gerar PDF / Imprimir
+        </button>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('report-output').innerHTML=''">
+          ✕ Fechar
+        </button>
+      </div>`;
+    // guarda o html gerado para a função de impressão
+    window._lastReportHtml = html;
   } catch (e) { out.innerHTML = ''; showToast(e.message, 'error'); }
+}
+
+function printReport() {
+  const html = window._lastReportHtml || '';
+  if (!html) { showToast('Gere um relatório primeiro', 'error'); return; }
+
+  const win = window.open('', '_blank', 'width=900,height=700');
+  win.document.write(`<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Relatório — Contratly</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #fff;
+      color: #1a1a1a;
+      font-size: 13px;
+      padding: 32px 40px;
+    }
+    h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; color: #111; }
+    h3 { font-size: 13px; font-weight: 600; margin: 20px 0 8px; color: #333; }
+    .meta { font-size: 11px; color: #888; margin-bottom: 24px; }
+    .card { background: #fff; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+    thead th {
+      padding: 8px 10px;
+      font-size: 10px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.8px;
+      color: #555;
+      border-bottom: 2px solid #e0e0e0;
+      text-align: left;
+    }
+    tbody tr { border-bottom: 1px solid #f0f0f0; }
+    tbody tr:hover { background: #fafafa; }
+    tbody td { padding: 9px 10px; font-size: 12px; color: #333; }
+    td:last-child { text-align: right; }
+    .code { font-family: monospace; font-size: 11px; color: #2563eb; }
+    .empty { color: #aaa; font-size: 12px; padding: 12px 0; }
+    .section-title { font-size: 13px; font-weight: 700; margin: 20px 0 8px; padding: 6px 10px; border-radius: 4px; }
+    .red   { color: #c0392b; background: #fdf0ee; }
+    .orange{ color: #b45309; background: #fff7ed; }
+    .yellow{ color: #92400e; background: #fffbeb; }
+    .accent{ color: #1d4ed8; background: #eff6ff; }
+    .footer {
+      margin-top: 40px; padding-top: 16px;
+      border-top: 1px solid #e0e0e0;
+      font-size: 10px; color: #aaa;
+      display: flex; justify-content: space-between;
+    }
+    @media print {
+      body { padding: 20px; }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print" style="margin-bottom:24px;display:flex;gap:10px">
+    <button onclick="window.print()" style="padding:8px 20px;background:#1d4ed8;color:#fff;border:none;border-radius:5px;font-size:13px;cursor:pointer;font-weight:600">
+      🖨️ Imprimir / Salvar PDF
+    </button>
+    <button onclick="window.close()" style="padding:8px 16px;background:#f3f4f6;color:#333;border:1px solid #ddd;border-radius:5px;font-size:13px;cursor:pointer">
+      Fechar
+    </button>
+    <span style="font-size:11px;color:#888;line-height:34px">
+      Para salvar como PDF: clique em Imprimir → escolha "Salvar como PDF" na impressora
+    </span>
+  </div>
+  ${html}
+  <div class="footer">
+    <span>Contratly — Sistema de Gestão de Contratos</span>
+    <span>Gerado em ${new Date().toLocaleString('pt-BR')}</span>
+  </div>
+</body>
+</html>`);
+  win.document.close();
+  win.focus();
 }
 
 function reportSection(title, list, color) {
