@@ -729,131 +729,183 @@ async function loadAudit() {
 //  REPORTS
 // ═══════════════════════════════════════════
 async function genReport(type) {
-  const out = document.getElementById('report-output');
-  out.innerHTML = '<div style="text-align:center;padding:20px"><div class="spinner" style="margin:0 auto"></div></div>';
+  const loading = document.getElementById('report-loading');
+  const out     = document.getElementById('report-output');
+  out.innerHTML = '';
+  loading.style.display = 'block';
 
   try {
-    const data = await get('/contracts?per_page=200');
+    const data      = await get('/contracts?per_page=200');
     const contracts = data.contracts;
-    const today = new Date();
-
-    let html = '';
+    const today     = new Date();
+    let   title     = '';
+    let   sections  = '';
 
     if (type === 'expiring') {
-      const d30 = contracts.filter(c => c.days_until_expiry !== null && c.days_until_expiry >= 0 && c.days_until_expiry <= 30);
-      const d60 = contracts.filter(c => c.days_until_expiry !== null && c.days_until_expiry > 30 && c.days_until_expiry <= 60);
-      const d90 = contracts.filter(c => c.days_until_expiry !== null && c.days_until_expiry > 60 && c.days_until_expiry <= 90);
-
-      html = `
-        <div class="card">
-          <div style="font-family:var(--font-display);font-size:20px;font-weight:800;margin-bottom:4px">📅 Relatório de Vencimentos</div>
-          <div style="font-size:12px;color:var(--text-muted);margin-bottom:24px">Gerado em ${today.toLocaleString('pt-BR')}</div>
-          ${reportSection('🚨 Vencendo em 30 dias', d30, 'red')}
-          ${reportSection('⚠️ Vencendo entre 30-60 dias', d60, 'orange')}
-          ${reportSection('📋 Vencendo entre 60-90 dias', d90, 'yellow')}
-        </div>`;
+      title = 'Relatório de Vencimentos';
+      const d30 = contracts.filter(c => c.days_until_expiry !== null && c.days_until_expiry >= 0  && c.days_until_expiry <= 30);
+      const d60 = contracts.filter(c => c.days_until_expiry !== null && c.days_until_expiry > 30  && c.days_until_expiry <= 60);
+      const d90 = contracts.filter(c => c.days_until_expiry !== null && c.days_until_expiry > 60  && c.days_until_expiry <= 90);
+      sections = reportSection('🚨 Vencendo em até 30 dias', d30, '#c0392b')
+               + reportSection('⚠️ Vencendo entre 30–60 dias', d60, '#b45309')
+               + reportSection('📋 Vencendo entre 60–90 dias', d90, '#854d0e');
     } else if (type === 'portfolio') {
+      title    = 'Portfólio Contratual Ativo';
       const active = contracts.filter(c => ['active','expiring'].includes(c.status));
-      html = `
-        <div class="card">
-          <div style="font-family:var(--font-display);font-size:20px;font-weight:800;margin-bottom:4px">📊 Portfólio Contratual Ativo</div>
-          <div style="font-size:12px;color:var(--text-muted);margin-bottom:24px">${active.length} contratos · Gerado em ${today.toLocaleString('pt-BR')}</div>
-          ${reportSection('Contratos Ativos', active, 'accent')}
-        </div>`;
-    } else {
-      html = `<div class="card"><p style="color:var(--text-secondary)">Relatório em desenvolvimento.</p></div>`;
+      sections = reportSection('Contratos Ativos', active, '#1d4ed8');
+    } else if (type === 'alerts') {
+      title = 'Relatório de Alertas';
+      const alerts = await get('/alerts');
+      sections = reportAlerts(alerts);
     }
 
-    out.innerHTML = html + `
-      <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end">
-        <button class="btn btn-primary" onclick="printReport()">
-          🖨️ Gerar PDF / Imprimir
-        </button>
-        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('report-output').innerHTML=''">
-          ✕ Fechar
-        </button>
-      </div>`;
-    // guarda o html gerado para a função de impressão
-    window._lastReportHtml = html;
-  } catch (e) { out.innerHTML = ''; showToast(e.message, 'error'); }
+    await gerarPDF(title, sections, today);
+  } catch (e) {
+    showToast('Erro ao gerar PDF: ' + e.message, 'error');
+  } finally {
+    loading.style.display = 'none';
+  }
 }
 
-function printReport() {
-  const html = window._lastReportHtml || '';
-  if (!html) { showToast('Gere um relatório primeiro', 'error'); return; }
+async function gerarPDF(title, sectionsHtml, today) {
+  // Cria elemento temporário invisível para renderizar o conteúdo
+  const container = document.createElement('div');
+  container.style.cssText = [
+    'position:fixed', 'left:-9999px', 'top:0',
+    'width:794px',    // A4 em 96dpi ≈ 794px
+    'background:#fff','color:#111',
+    'font-family:Arial,sans-serif','font-size:13px',
+    'padding:48px 56px','line-height:1.6',
+  ].join(';');
 
-  const win = window.open('', '_blank', 'width=900,height=700');
-  win.document.write(`<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>Relatório — Contratly</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: #fff;
-      color: #1a1a1a;
-      font-size: 13px;
-      padding: 32px 40px;
+  container.innerHTML = `
+    <div style="border-bottom:3px solid #1d4ed8;padding-bottom:16px;margin-bottom:8px">
+      <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#1d4ed8;margin-bottom:6px">CONTRATLY · GESTÃO DE CONTRATOS</div>
+      <div style="font-size:24px;font-weight:700;color:#111">${title}</div>
+    </div>
+    <div style="font-size:11px;color:#888;margin-bottom:32px">
+      Gerado em ${today.toLocaleString('pt-BR')} · Contratly
+    </div>
+    ${sectionsHtml}
+    <div style="margin-top:48px;padding-top:12px;border-top:1px solid #e5e7eb;font-size:10px;color:#aaa;display:flex;justify-content:space-between">
+      <span>Contratly — Sistema de Gestão de Contratos</span>
+      <span>${today.toLocaleDateString('pt-BR')}</span>
+    </div>
+  `;
+
+  document.body.appendChild(container);
+
+  try {
+    const canvas = await html2canvas(container, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+    });
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+    const pageW  = 210;
+    const pageH  = 297;
+    const margin = 0;
+    const imgW   = pageW - margin * 2;
+    const imgH   = (canvas.height * imgW) / canvas.width;
+
+    let y = margin;
+    let remaining = imgH;
+
+    // Divide em páginas se o conteúdo for maior que A4
+    const pageImgH = pageH - margin * 2;
+    let srcY = 0;
+
+    while (remaining > 0) {
+      const sliceH   = Math.min(pageImgH, remaining);
+      const slicePx  = (sliceH / imgH) * canvas.height;
+
+      const sliceCanvas = document.createElement('canvas');
+      sliceCanvas.width  = canvas.width;
+      sliceCanvas.height = slicePx;
+      const ctx = sliceCanvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+      ctx.drawImage(canvas, 0, srcY, canvas.width, slicePx, 0, 0, canvas.width, slicePx);
+
+      const imgData = sliceCanvas.toDataURL('image/png');
+      if (srcY > 0) pdf.addPage();
+      pdf.addImage(imgData, 'PNG', margin, margin, imgW, sliceH);
+
+      srcY      += slicePx;
+      remaining -= sliceH;
     }
-    h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; color: #111; }
-    h3 { font-size: 13px; font-weight: 600; margin: 20px 0 8px; color: #333; }
-    .meta { font-size: 11px; color: #888; margin-bottom: 24px; }
-    .card { background: #fff; }
-    table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-    thead th {
-      padding: 8px 10px;
-      font-size: 10px; font-weight: 600;
-      text-transform: uppercase; letter-spacing: 0.8px;
-      color: #555;
-      border-bottom: 2px solid #e0e0e0;
-      text-align: left;
-    }
-    tbody tr { border-bottom: 1px solid #f0f0f0; }
-    tbody tr:hover { background: #fafafa; }
-    tbody td { padding: 9px 10px; font-size: 12px; color: #333; }
-    td:last-child { text-align: right; }
-    .code { font-family: monospace; font-size: 11px; color: #2563eb; }
-    .empty { color: #aaa; font-size: 12px; padding: 12px 0; }
-    .section-title { font-size: 13px; font-weight: 700; margin: 20px 0 8px; padding: 6px 10px; border-radius: 4px; }
-    .red   { color: #c0392b; background: #fdf0ee; }
-    .orange{ color: #b45309; background: #fff7ed; }
-    .yellow{ color: #92400e; background: #fffbeb; }
-    .accent{ color: #1d4ed8; background: #eff6ff; }
-    .footer {
-      margin-top: 40px; padding-top: 16px;
-      border-top: 1px solid #e0e0e0;
-      font-size: 10px; color: #aaa;
-      display: flex; justify-content: space-between;
-    }
-    @media print {
-      body { padding: 20px; }
-      .no-print { display: none !important; }
-    }
-  </style>
-</head>
-<body>
-  <div class="no-print" style="margin-bottom:24px;display:flex;gap:10px">
-    <button onclick="window.print()" style="padding:8px 20px;background:#1d4ed8;color:#fff;border:none;border-radius:5px;font-size:13px;cursor:pointer;font-weight:600">
-      🖨️ Imprimir / Salvar PDF
-    </button>
-    <button onclick="window.close()" style="padding:8px 16px;background:#f3f4f6;color:#333;border:1px solid #ddd;border-radius:5px;font-size:13px;cursor:pointer">
-      Fechar
-    </button>
-    <span style="font-size:11px;color:#888;line-height:34px">
-      Para salvar como PDF: clique em Imprimir → escolha "Salvar como PDF" na impressora
-    </span>
-  </div>
-  ${html}
-  <div class="footer">
-    <span>Contratly — Sistema de Gestão de Contratos</span>
-    <span>Gerado em ${new Date().toLocaleString('pt-BR')}</span>
-  </div>
-</body>
-</html>`);
-  win.document.close();
-  win.focus();
+
+    const filename = `contratly-${title.toLowerCase().replace(/\s+/g,'-')}-${today.toISOString().slice(0,10)}.pdf`;
+    pdf.save(filename);
+    showToast('PDF gerado com sucesso!', 'success');
+  } finally {
+    document.body.removeChild(container);
+  }
+}
+
+function reportSection(title, list, color) {
+  if (!list.length) return `
+    <div style="margin-bottom:24px">
+      <div style="font-size:13px;font-weight:700;color:${color};margin-bottom:8px;padding:6px 10px;background:${color}18;border-radius:4px">${title} (0)</div>
+      <p style="color:#999;font-size:12px;padding:0 10px">Nenhum contrato neste período.</p>
+    </div>`;
+
+  const rows = list.map(c => `
+    <tr>
+      <td style="padding:8px 10px;font-family:monospace;font-size:11px;color:#2563eb;border-bottom:1px solid #f0f0f0">${c.code}</td>
+      <td style="padding:8px 10px;font-size:12px;border-bottom:1px solid #f0f0f0">${c.title}</td>
+      <td style="padding:8px 10px;font-size:12px;border-bottom:1px solid #f0f0f0">${c.counterparty_name}</td>
+      <td style="padding:8px 10px;font-family:monospace;font-size:11px;border-bottom:1px solid #f0f0f0">${formatDate(c.end_date)}</td>
+      <td style="padding:8px 10px;font-family:monospace;font-size:11px;text-align:right;border-bottom:1px solid #f0f0f0">${c.value_monthly ? formatMoney(c.value_monthly) : '—'}</td>
+    </tr>`).join('');
+
+  return `
+    <div style="margin-bottom:28px">
+      <div style="font-size:13px;font-weight:700;color:${color};margin-bottom:10px;padding:6px 10px;background:${color}18;border-radius:4px">${title} (${list.length})</div>
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr style="background:#f8f9fa">
+            <th style="padding:8px 10px;font-size:10px;color:#555;text-align:left;border-bottom:2px solid #e0e0e0;text-transform:uppercase;letter-spacing:0.8px">Código</th>
+            <th style="padding:8px 10px;font-size:10px;color:#555;text-align:left;border-bottom:2px solid #e0e0e0;text-transform:uppercase;letter-spacing:0.8px">Contrato</th>
+            <th style="padding:8px 10px;font-size:10px;color:#555;text-align:left;border-bottom:2px solid #e0e0e0;text-transform:uppercase;letter-spacing:0.8px">Contraparte</th>
+            <th style="padding:8px 10px;font-size:10px;color:#555;text-align:left;border-bottom:2px solid #e0e0e0;text-transform:uppercase;letter-spacing:0.8px">Vencimento</th>
+            <th style="padding:8px 10px;font-size:10px;color:#555;text-align:right;border-bottom:2px solid #e0e0e0;text-transform:uppercase;letter-spacing:0.8px">Valor/mês</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+function reportAlerts(alerts) {
+  if (!alerts.length) return '<p style="color:#999;font-size:12px">Nenhum alerta encontrado.</p>';
+  const priorityColor = { critical:'#c0392b', high:'#b45309', medium:'#854d0e', low:'#166534' };
+  const priorityLabel = { critical:'Crítico', high:'Alto', medium:'Médio', low:'Baixo' };
+  const rows = alerts.map(a => `
+    <tr>
+      <td style="padding:8px 10px;font-size:12px;border-bottom:1px solid #f0f0f0">${a.contract_title || '—'}</td>
+      <td style="padding:8px 10px;font-size:12px;border-bottom:1px solid #f0f0f0">${a.title}</td>
+      <td style="padding:8px 10px;font-family:monospace;font-size:11px;color:${priorityColor[a.priority]||'#333'};font-weight:700;border-bottom:1px solid #f0f0f0">${priorityLabel[a.priority]||a.priority}</td>
+      <td style="padding:8px 10px;font-family:monospace;font-size:11px;border-bottom:1px solid #f0f0f0">${a.trigger_date ? formatDate(a.trigger_date) : '—'}</td>
+      <td style="padding:8px 10px;font-size:11px;border-bottom:1px solid #f0f0f0">${a.status}</td>
+    </tr>`).join('');
+  return `
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="background:#f8f9fa">
+          <th style="padding:8px 10px;font-size:10px;color:#555;text-align:left;border-bottom:2px solid #e0e0e0;text-transform:uppercase;letter-spacing:0.8px">Contrato</th>
+          <th style="padding:8px 10px;font-size:10px;color:#555;text-align:left;border-bottom:2px solid #e0e0e0;text-transform:uppercase;letter-spacing:0.8px">Alerta</th>
+          <th style="padding:8px 10px;font-size:10px;color:#555;text-align:left;border-bottom:2px solid #e0e0e0;text-transform:uppercase;letter-spacing:0.8px">Prioridade</th>
+          <th style="padding:8px 10px;font-size:10px;color:#555;text-align:left;border-bottom:2px solid #e0e0e0;text-transform:uppercase;letter-spacing:0.8px">Data</th>
+          <th style="padding:8px 10px;font-size:10px;color:#555;text-align:left;border-bottom:2px solid #e0e0e0;text-transform:uppercase;letter-spacing:0.8px">Status</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
 }
 
 function reportSection(title, list, color) {
