@@ -1,4 +1,4 @@
-# Contratly 📋
+# Contractly 📋
 ### Sistema de Gestão de Contratos com Alertas Automáticos
 
 > **Problema resolvido:** O jurídico de empresas médias perde dinheiro todo mês por esquecer prazos contratuais. ContratosPy automatiza alertas de vencimento, renovação e marcos — nunca mais uma multa por prazo esquecido.
