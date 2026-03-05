@@ -172,8 +172,8 @@ body {
 /* ── FORMS ── */
 .form-group { margin-bottom: 12px; }
 .form-group label {
-  display: block; font-size: 12px; font-weight: 500;
-  color: var(--text-secondary); margin-bottom: 6px;
+  display: block; font-size: 11px; font-weight: 700;
+  color: var(--text-primary); margin-bottom: 6px;
   text-transform: uppercase; letter-spacing: 0.8px;
   font-family: var(--font-mono);
 }
@@ -183,9 +183,10 @@ input, select, textarea {
   background: #f0faf6;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  color: var(--text-primary);
+  color: #0f2d22;
   font-family: var(--font-body);
   font-size: 14px;
+  font-weight: 500;
   padding: 10px 12px;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
@@ -524,7 +525,7 @@ tbody td { padding: 12px 14px; font-size: 13px; vertical-align: middle; }
   position: sticky; top: 0; background: var(--bg-card); z-index: 1;
 }
 
-.modal-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; }
+.modal-title { font-family: var(--font-display); font-size: 18px; font-weight: 800; color: #0f2d22; }
 .modal-body { padding: 24px; }
 .modal-footer {
   padding: 16px 24px;
@@ -537,11 +538,11 @@ tbody td { padding: 12px 14px; font-size: 13px; vertical-align: middle; }
 .form-grid .full { grid-column: 1 / -1; }
 .form-section-title {
   font-family: var(--font-mono);
-  font-size: 10px; color: var(--accent);
+  font-size: 10px; font-weight: 700; color: #1d6a54;
   text-transform: uppercase; letter-spacing: 2px;
   margin-bottom: 14px; margin-top: 4px;
   padding-bottom: 8px;
-  border-bottom: 1px solid rgba(29,106,84,0.2);
+  border-bottom: 2px solid rgba(29,106,84,0.25);
 }
 
 /* ── SEARCH & FILTERS ── */
