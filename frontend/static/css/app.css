@@ -94,12 +94,7 @@ body {
   margin-bottom: 20px;
 }
 
-.login-logo-img {
-  width: 180px;
-  height: auto;
-  display: block;
-  filter: brightness(1.05);
-}
+
 
 .login-card h2 {
   font-family: var(--font-display);
@@ -154,18 +149,20 @@ body {
 
 /* Logo no sidebar */
 .sidebar-logo-img {
-  width: 120px;
+  width: 110px;
   height: auto;
   display: block;
   margin: 0 auto;
+  border-radius: 10px;
 }
 
 /* Logo no login */
 .login-logo-img {
-  width: 160px;
+  width: 180px;
   height: auto;
   display: block;
   margin: 0 auto;
+  border-radius: 12px;
 }
 
 /* ── FORMS ── */
@@ -352,13 +349,8 @@ textarea { resize: vertical; min-height: 80px; }
 }
 
 .page-title {
-  font-family: var(--font-display);
-  font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: #0f2d22;
-}
-.page-title--alerts {
   font-family: 'Arial Black', 'Arial Bold', Arial, sans-serif;
-  font-weight: 900;
-  letter-spacing: 0;
+  font-size: 26px; font-weight: 900; letter-spacing: 0; color: #0f2d22;
 }
 
 .page-subtitle { color: var(--text-secondary); font-size: 13px; margin-top: 4px; }
