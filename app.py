@@ -888,14 +888,45 @@ def seed_database():
 scheduler = BackgroundScheduler(daemon=True)
 scheduler.add_job(run_alert_engine, IntervalTrigger(hours=1), id='alert_engine', replace_existing=True)
 
+# Inicialização ao subir (funciona tanto com gunicorn quanto direto)
+with app.app_context():
+    db.create_all()
+    try:
+        with db.engine.connect() as conn:
+            conn.execute(db.text(
+                "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS alert_days_before INTEGER DEFAULT 30"
+            ))
+            conn.commit()
+            print("[INIT] Migration alert_days_before: ok")
+    except Exception as e:
+        print(f"[INIT] Migration aviso: {e}")
+    seed_database()
+
+scheduler.start()
+
 
 # ─────────────────────────────────────────────
 # ENTRY POINT
 # ─────────────────────────────────────────────
 
+def run_migrations():
+    """Adiciona colunas novas sem derrubar dados existentes."""
+    try:
+        with db.engine.connect() as conn:
+            # alert_days_before — adicionado na v2.1
+            conn.execute(db.text(
+                "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS alert_days_before INTEGER DEFAULT 30"
+            ))
+            conn.commit()
+            print("[MIGRATION] Colunas verificadas/atualizadas.")
+    except Exception as e:
+        print(f"[MIGRATION] Aviso: {e}")
+
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+        run_migrations()
         seed_database()
         run_alert_engine()
     scheduler.start()
