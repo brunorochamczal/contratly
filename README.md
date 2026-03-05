@@ -1,4 +1,4 @@
-<div align="center">
+<img width="1915" height="860" alt="image" src="https://github.com/user-attachments/assets/171368f2-9e49-4d68-8b91-94c2fc513932" /><div align="center">
 
 <img src="docs/screenshots/logo.png" alt="Contractly" width="180"/>
 
@@ -18,13 +18,13 @@ Controle prazos, receba alertas automáticos e mantenha um histórico auditável
 
 ## 📸 Telas do Sistema
 
-> _Adicione as capturas de tela abaixo. Salve os arquivos na pasta `docs/screenshots/` do repositório e substitua os blocos indicados._
+
 
 <br/>
 
-**🔐 Tela de Login**
-<!-- Após salvar a imagem, substitua a linha abaixo: -->
-<!-- ![Login](docs/screenshots/login.png) -->
+**🔐 Dashboard**
+
+<!-- ![Login](frontend/static/imgs/dash.png) -->
 
 <br/>
 
