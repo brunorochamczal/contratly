@@ -392,6 +392,7 @@ async function openEditContract(id) {
     document.getElementById('f-end').value = c.end_date || '';
     document.getElementById('f-renewal').value = c.renewal_type || 'manual';
     document.getElementById('f-notice').value = c.renewal_notice_days || 30;
+    document.getElementById('f-alert-days').value = c.alert_days_before || 30;
     document.getElementById('f-value-total').value = c.value_total || '';
     document.getElementById('f-value-monthly').value = c.value_monthly || '';
     document.getElementById('f-responsible').value = c.responsible_id || '';
@@ -412,6 +413,7 @@ function clearContractForm() {
   document.getElementById('f-type').value = 'service';
   document.getElementById('f-renewal').value = 'manual';
   document.getElementById('f-notice').value = '30';
+  document.getElementById('f-alert-days').value = '30';
   document.getElementById('f-confidential').value = 'false';
   document.getElementById('f-responsible').value = '';
 }
@@ -431,6 +433,7 @@ async function saveContract() {
     end_date: document.getElementById('f-end').value || null,
     renewal_type: document.getElementById('f-renewal').value,
     renewal_notice_days: parseInt(document.getElementById('f-notice').value),
+    alert_days_before: parseInt(document.getElementById('f-alert-days').value) || 30,
     value_total: document.getElementById('f-value-total').value || null,
     value_monthly: document.getElementById('f-value-monthly').value || null,
     responsible_id: document.getElementById('f-responsible').value || null,
