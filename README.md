@@ -1,16 +1,109 @@
-# Contractly 📋
-### Sistema de Gestão de Contratos com Alertas Automáticos
+# Contractly — Gestão de Contratos Jurídicos
 
-> **Problema resolvido:** O jurídico de empresas médias perde dinheiro todo mês por esquecer prazos contratuais. ContratosPy automatiza alertas de vencimento, renovação e marcos — nunca mais uma multa por prazo esquecido.
+> Plataforma web para gestão do portfólio contratual de escritórios de advocacia e departamentos jurídicos corporativos. Controle prazos, receba alertas automáticos e mantenha um histórico auditável de todas as decisões contratuais.
+
+---
+
+## O que é o Contractly?
+
+O Contractly é um sistema de gestão de contratos desenvolvido para eliminar o risco de vencimentos não monitorados. Em ambientes jurídicos, perder um prazo contratual pode gerar multas, rescisões indesejadas ou prejuízos financeiros significativos. O sistema centraliza todos os contratos em um único painel, automatiza os alertas de vencimento e garante que o responsável seja notificado no momento certo — sem depender de planilhas, lembretes manuais ou memória.
 
 ---
 
-## ⚡ Engine de alertas
+## Para quem é este sistema?
 
-O APScheduler roda **a cada hora** dentro do próprio processo Gunicorn e verifica todos os contratos ativos. Alertas são disparados automaticamente em:
-
-`90d → 60d → 30d → 15d → 7d → 1d`
-
-Cada marco gera: registro no banco + e-mail para o responsável (se configurado) + notificação no painel.
+- **Escritórios de advocacia** que gerenciam contratos de clientes e contratos internos
+- **Departamentos jurídicos corporativos** com portfólios de contratos de fornecedores, locação, serviços e parcerias
+- **Gestores** que precisam de visibilidade sobre prazos e valores contratuais sem depender da equipe jurídica para cada consulta
 
 ---
+
+## Funcionalidades
+
+### 📊 Dashboard Executivo
+Visão consolidada do portfólio em tempo real. Ao fazer login, o usuário visualiza imediatamente quantos contratos estão ativos, quantos estão próximos do vencimento, quantos já venceram e o valor total e mensal sob gestão. Os contratos mais críticos são listados diretamente na tela inicial.
+
+### 📄 Gestão de Contratos
+Cadastro completo de contratos com todos os dados relevantes: partes, tipo, datas, valores, responsável interno, departamento e observações. É possível marcar contratos como confidenciais, limitando o acesso apenas ao responsável e ao administrador. A listagem permite busca por título, contraparte ou código, com filtros por status e tipo.
+
+### 🔔 Alertas Personalizados
+Cada contrato possui um prazo de alerta configurável pelo próprio usuário no momento do cadastro. O usuário define com quantos dias de antecedência deseja ser notificado — por exemplo, 45 dias antes do vencimento. O sistema cria **1 alerta por contrato**, dispara uma notificação no painel e envia um e-mail automático ao responsável quando o prazo chega. Não há alertas desnecessários: apenas o aviso configurado, no momento certo.
+
+### 🔄 Gestão de Renovações
+Toda decisão sobre um contrato vencendo — renovar, encerrar ou aguardar — é registrada no sistema. Isso cria um histórico auditável completo. Ao renovar, o sistema atualiza automaticamente as datas do contrato e recria o alerta para o novo período, sem necessidade de reconfiguração.
+
+### 👥 Controle de Acesso por Perfil
+O sistema possui quatro perfis de acesso com permissões distintas: Administrador, Jurídico, Gestor e Visualizador. Cada usuário vê e pode fazer apenas o que seu perfil permite, garantindo segurança e integridade das informações.
+
+### 📈 Relatórios
+Relatórios prontos para reuniões e auditorias: vencimentos próximos (30, 60 e 90 dias), portfólio completo, histórico de alertas e visão financeira por tipo e departamento. Todos os relatórios podem ser exportados em PDF diretamente pelo sistema.
+
+### 🔍 Auditoria
+Registro automático de todas as ações realizadas no sistema: criação, edição e exclusão de contratos, alterações de usuários e reconhecimento de alertas. Acessível apenas pelo perfil Administrador.
+
+---
+
+## Como funciona — Workflow principal
+
+```
+1. Cadastro do contrato
+   └── Usuário informa os dados e define o prazo de alerta (ex: 30 dias antes)
+
+2. Sistema agenda o alerta
+   └── Um alerta é criado internamente para a data calculada
+
+3. Monitoramento automático
+   └── A cada hora, o sistema verifica todos os contratos
+   └── Quando o prazo chega, o alerta aparece no painel
+
+4. Notificação
+   └── E-mail enviado automaticamente ao responsável pelo contrato
+
+5. Ação e reconhecimento
+   └── Responsável toma a ação (renovar, contatar, etc.)
+   └── Clica em "Resolver" — alerta sai da fila ativa
+
+6. Decisão registrada
+   └── Renovação ou encerramento é registrado com histórico
+   └── Novo alerta criado automaticamente para o próximo período
+```
+
+---
+
+## Perfis de acesso
+
+| Perfil | O que pode fazer |
+|---|---|
+| **Admin** | Acesso total: contratos, usuários, auditoria, confidenciais |
+| **Jurídico** | Criar e editar contratos, ver todos os alertas, registrar renovações |
+| **Gestor** | Visualizar contratos e alertas do seu departamento |
+| **Viewer** | Somente visualização dos contratos permitidos |
+
+---
+
+## Por que o Contractly é útil para o negócio jurídico?
+
+**Redução de risco operacional:** Prazos contratuais perdidos geram multas, renovações automáticas indesejadas e exposição legal. O sistema elimina esse risco com alertas automáticos configurados por contrato.
+
+**Visibilidade financeira:** O dashboard consolida o valor total e mensal de todos os contratos ativos, permitindo decisões informadas sobre renovações e cortes de custo.
+
+**Rastreabilidade e conformidade:** Todo o ciclo de vida de um contrato — cadastro, alertas, renovações, encerramentos — fica registrado com data, hora e usuário responsável, atendendo requisitos de auditoria interna e externa.
+
+**Trabalho colaborativo com segurança:** Múltiplos usuários acessam o sistema com permissões adequadas ao seu papel, sem risco de alterações indevidas ou acesso a informações confidenciais.
+
+**Menos dependência de planilhas:** Centraliza em um único lugar informações que normalmente ficam espalhadas em planilhas Excel, pastas de e-mail e agendas pessoais.
+
+---
+
+## Tecnologias utilizadas
+
+**Backend:** Python · Flask  
+**Frontend:** HTML · CSS · JavaScript  
+**Banco de dados:** PostgreSQL  
+**Hospedagem:** Render  
+**Agendamento de alertas:** APScheduler  
+**Exportação PDF:** jsPDF
+
+---
+
+*Contractly — Gestão de Contratos Jurídicos*
