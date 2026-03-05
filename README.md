@@ -31,12 +31,16 @@ Controle prazos, receba alertas automáticos e mantenha um histórico auditável
 <br/>
 
 **📄 Relatórios**
+
 <img src="./frontend/static/imgs/relatorios.png" width="800" alt="Dashboard"/>
 
 <br/>
 
 **📝 Cadastro de Contrato**
+
 <img src="./frontend/static/imgs/cadastro.png" width="800" alt="Dashboard"/>
+
+<br/>
 
 ---
 
