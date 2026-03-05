@@ -25,7 +25,7 @@ Controle prazos, receba alertas automáticos e mantenha um histórico auditável
 
 **🔐 Dashboard**
 
-<img src="./frontend/static/imgs/dash.png" width="500" alt="Dashboard"/>
+<img src="./frontend/static/imgs/dash.png" width="800" alt="Dashboard"/>
 
 <br/>
 
