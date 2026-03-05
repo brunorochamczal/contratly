@@ -103,6 +103,7 @@ class Contract(db.Model):
     end_date            = db.Column(db.Date)
     renewal_type        = db.Column(db.String(20), default='manual')
     renewal_notice_days = db.Column(db.Integer, default=30)
+    alert_days_before   = db.Column(db.Integer, default=30)  # dias antes do vencimento para alertar
     auto_renewal_months = db.Column(db.Integer)
     value_total         = db.Column(db.Numeric(15, 2))
     value_monthly       = db.Column(db.Numeric(15, 2))
@@ -145,6 +146,7 @@ class Contract(db.Model):
             'end_date': self.end_date.isoformat() if self.end_date else None,
             'renewal_type': self.renewal_type,
             'renewal_notice_days': self.renewal_notice_days,
+            'alert_days_before': self.alert_days_before,
             'auto_renewal_months': self.auto_renewal_months,
             'value_total': float(self.value_total) if self.value_total else None,
             'value_monthly': float(self.value_monthly) if self.value_monthly else None,
@@ -408,81 +410,79 @@ def build_alert_email(contract, days_remaining):
 
 
 def run_alert_engine():
+    """Roda a cada hora. Ativa alertas cujo trigger_date chegou hoje."""
     with app.app_context():
-        today     = date.today()
-        contracts = Contract.query.filter(
-            Contract.status.in_(['active', 'expiring']),
-            Contract.end_date.isnot(None),
-        ).all()
-        created = 0
-        for contract in contracts:
+        today = date.today()
+        updated = 0
+
+        # Atualizar status dos contratos
+        for contract in Contract.query.filter(Contract.end_date.isnot(None)).all():
             days = (contract.end_date - today).days
-            if days < 0:
-                if contract.status != 'expired':
-                    contract.status = 'expired'
-                    db.session.commit()
-            elif days <= 30 and contract.status != 'expiring':
+            if days < 0 and contract.status not in ('expired', 'cancelled'):
+                contract.status = 'expired'
+                db.session.commit()
+            elif 0 <= days <= 30 and contract.status == 'active':
                 contract.status = 'expiring'
                 db.session.commit()
 
-            for alert_days in DEFAULT_ALERT_DAYS:
-                # Só dispara quando hoje é o dia exato do marco (±1 dia de tolerância)
-                if not (alert_days - 1 <= days <= alert_days + 1):
-                    continue
-                # Verifica se já existe alerta para este marco neste contrato
-                existing = Alert.query.filter_by(
-                    contract_id=contract.id, days_before=alert_days
-                ).first()
-                if existing:
-                    continue
+        # Ativar alertas pendentes cujo trigger_date chegou
+        due_alerts = Alert.query.filter(
+            Alert.trigger_date <= today,
+            Alert.status == 'pending'
+        ).all()
 
-                alert = Alert(
-                    contract_id=contract.id, alert_type='expiration',
-                    days_before=alert_days, trigger_date=today,
-                    event_date=contract.end_date,
-                    title=f"Contrato vence em {days} dia(s)",
-                    message=f"'{contract.title}' vence em {days} dias ({contract.end_date.strftime('%d/%m/%Y')}).",
-                    status='pending', priority=get_priority(days),
-                )
-                db.session.add(alert)
-                db.session.flush()
+        for alert in due_alerts:
+            contract = alert.contract
+            days = (contract.end_date - today).days
+            # Atualizar título com dias reais restantes
+            alert.title   = f"Contrato vence em {max(days,0)} dia(s)"
+            alert.message = f"'{contract.title}' vence em {max(days,0)} dias ({contract.end_date.strftime('%d/%m/%Y')})."
+            alert.priority = get_priority(days)
 
-                if contract.responsible and contract.responsible.email:
-                    subject = f"[{get_priority(days).upper()}] Contrato vence em {days}d — {contract.code}"
-                    sent    = send_email_alert(contract.responsible.email, subject, build_alert_email(contract, days))
-                    if sent:
-                        alert.status  = 'sent'
-                        alert.sent_at = datetime.utcnow()
+            if contract.responsible and contract.responsible.email:
+                subject = f"[{alert.priority.upper()}] Contrato vence em {days}d — {contract.code}"
+                sent    = send_email_alert(contract.responsible.email, subject, build_alert_email(contract, days))
+                if sent:
+                    alert.status  = 'sent'
+                    alert.sent_at = datetime.utcnow()
 
-                db.session.commit()
-                created += 1
-        print(f"[SCHEDULER] {created} alertas criados — {datetime.now()}")
+            db.session.commit()
+            updated += 1
+
+        print(f"[SCHEDULER] {updated} alertas processados — {datetime.now()}")
 
 
 def _create_default_alerts(contract):
-    """Cria os alertas futuros ao cadastrar um contrato.
-    Cada marco (90/60/30/15/7/1 dias) gera apenas 1 alerta,
-    somente se a data-gatilho ainda não passou.
+    """Cria 1 único alerta no prazo definido pelo usuário (alert_days_before).
+    Se esse prazo já passou, o alerta aparece imediatamente.
     """
-    today = date.today()
-    for days in DEFAULT_ALERT_DAYS:
-        trigger = contract.end_date - timedelta(days=days)
-        if trigger < today:
-            continue  # marco já passou, não criar
-        # Evitar duplicata se função for chamada duas vezes
-        exists = Alert.query.filter_by(
-            contract_id=contract.id, days_before=days
-        ).first()
-        if exists:
-            continue
-        db.session.add(Alert(
-            contract_id=contract.id, alert_type='expiration',
-            days_before=days, trigger_date=trigger,
-            event_date=contract.end_date,
-            title=f"Contrato vence em {days} dia(s)",
-            message=f"O contrato '{contract.title}' vence em {days} dias.",
-            status='pending', priority=get_priority(days),
-        ))
+    today          = date.today()
+    days_remaining = (contract.end_date - today).days
+    alert_before   = contract.alert_days_before or 30
+
+    # Remover alertas antigos pendentes deste contrato (limpeza)
+    Alert.query.filter(
+        Alert.contract_id == contract.id,
+        Alert.status == 'pending'
+    ).delete()
+
+    # Calcular trigger_date: end_date - alert_before dias
+    trigger = contract.end_date - timedelta(days=alert_before)
+
+    # Se a data de alerta já passou, disparar hoje
+    if trigger < today:
+        trigger = today
+
+    days_at_trigger = (contract.end_date - trigger).days
+
+    db.session.add(Alert(
+        contract_id=contract.id, alert_type='expiration',
+        days_before=alert_before, trigger_date=trigger,
+        event_date=contract.end_date,
+        title=f"Contrato vence em {days_at_trigger} dia(s)",
+        message=f"O contrato '{contract.title}' vence em {days_at_trigger} dias ({contract.end_date.strftime('%d/%m/%Y')}).",
+        status='pending', priority=get_priority(days_at_trigger),
+    ))
     db.session.commit()
 
 
@@ -617,6 +617,7 @@ def create_contract():
             end_date=date.fromisoformat(data['end_date']) if data.get('end_date') else None,
             renewal_type=data.get('renewal_type', 'manual'),
             renewal_notice_days=int(data.get('renewal_notice_days', 30)),
+            alert_days_before=int(data.get('alert_days_before', 30)),
             auto_renewal_months=data.get('auto_renewal_months'),
             value_total=data.get('value_total'), value_monthly=data.get('value_monthly'),
             currency=data.get('currency', 'BRL'), description=data.get('description'),
@@ -657,7 +658,7 @@ def update_contract(cid):
     old  = contract.to_dict()
     data = request.json
     for f in ['title','contract_type','status','counterparty_name','counterparty_doc',
-              'counterparty_email','renewal_type','renewal_notice_days','auto_renewal_months',
+              'counterparty_email','renewal_type','renewal_notice_days','auto_renewal_months','alert_days_before',
               'value_total','value_monthly','currency','description','internal_notes',
               'responsible_id','department','is_confidential']:
         if f in data:
