@@ -23,29 +23,20 @@ Controle prazos, receba alertas automáticos e mantenha um histórico auditável
 
 <br/>
 
-**🔐 Dashboard**
+
+**📊 Dashboard**
 
 <img src="./frontend/static/imgs/dash.png" width="800" alt="Dashboard"/>
 
 <br/>
 
-**📊 Dashboard**
-<!-- ![Dashboard](docs/screenshots/dashboard.png) -->
-
-<br/>
-
-**📄 Gestão de Contratos**
-<!-- ![Contratos](docs/screenshots/contratos.png) -->
-
-<br/>
-
-**🔔 Painel de Alertas**
-<!-- ![Alertas](docs/screenshots/alertas.png) -->
+**📄 Relatórios**
+<img src="./frontend/static/imgs/relatorios.png" width="800" alt="Dashboard"/>
 
 <br/>
 
 **📝 Cadastro de Contrato**
-<!-- ![Cadastro](docs/screenshots/cadastro.png) -->
+<img src="./frontend/static/imgs/cadastro.png" width="800" alt="Dashboard"/>
 
 ---
 
