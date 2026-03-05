@@ -34,7 +34,7 @@
       <span id="login-btn-text">Entrar</span>
     </button>
     <p style="margin-top:16px;font-size:11px;color:var(--text-muted);text-align:center;">
-      Demo: admin@empresa.com / admin123
+      Demo: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="a7c6c3cacec9e7c2cad7d5c2d4c689c4c8ca">[email&#160;protected]</a> / admin123
     </p>
   </div>
 </div>
@@ -454,18 +454,17 @@
           </select>
         </div>
         <div class="form-group">
-          <label>Aviso prévio (dias)</label>
+          <label>Prazo contratual de notificação (dias)</label>
           <input type="number" id="f-notice" value="30" min="1" max="365">
+          <div style="margin-top:4px;font-size:12px;color:var(--text-muted)">Cláusula do contrato: quantos dias antes do vencimento a contraparte deve ser notificada sobre renovação ou rescisão.</div>
         </div>
         <div class="form-group full">
-          <label>🔔 Alertar com quantos dias de antecedência? *</label>
+          <label>🔔 Emitir alerta interno com quantos dias de antecedência?</label>
           <div style="display:flex;align-items:center;gap:12px">
             <input type="number" id="f-alert-days" value="30" min="1" max="365" style="width:120px">
             <span style="font-size:13px;color:var(--text-secondary)">dias antes do vencimento</span>
           </div>
-          <div style="margin-top:6px;font-size:12px;color:var(--text-muted)">
-            O sistema emitirá <strong>1 alerta</strong> neste prazo. Ex: 30 = alerta 30 dias antes do vencimento.
-          </div>
+          <div style="margin-top:6px;font-size:12px;color:var(--text-muted)">O sistema enviará 1 notificação ao responsável neste prazo. Ex: 45 = alerta 45 dias antes do vencimento.</div>
         </div>
       </div>
 
@@ -624,10 +623,4 @@
   </div>
 </div>
 
-<!-- Toast Container -->
-<div class="toast-container" id="toast-container"></div>
-
-
-<script src="static/js/app.js"></script>
-</body>
-</html>
+<!-- Toast Container
