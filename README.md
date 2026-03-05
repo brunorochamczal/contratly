@@ -1,24 +1,72 @@
-# Contractly — Gestão de Contratos Jurídicos
+<div align="center">
 
-> Plataforma web para gestão do portfólio contratual de escritórios de advocacia e departamentos jurídicos corporativos. Controle prazos, receba alertas automáticos e mantenha um histórico auditável de todas as decisões contratuais.
+<img src="docs/screenshots/logo.png" alt="Contractly" width="180"/>
 
----
+# Contractly
+### Gestão de Contratos Jurídicos
 
-## O que é o Contractly?
+**Plataforma web para gestão do portfólio contratual de escritórios de advocacia e departamentos jurídicos corporativos.**  
+Controle prazos, receba alertas automáticos e mantenha um histórico auditável de todas as decisões contratuais.
 
-O Contractly é um sistema de gestão de contratos desenvolvido para eliminar o risco de vencimentos não monitorados. Em ambientes jurídicos, perder um prazo contratual pode gerar multas, rescisões indesejadas ou prejuízos financeiros significativos. O sistema centraliza todos os contratos em um único painel, automatiza os alertas de vencimento e garante que o responsável seja notificado no momento certo — sem depender de planilhas, lembretes manuais ou memória.
+![Status](https://img.shields.io/badge/status-ativo-1d6a54?style=flat-square)
+![Versão](https://img.shields.io/badge/versão-2.0-1d6a54?style=flat-square)
+![Licença](https://img.shields.io/badge/licença-privado-lightgrey?style=flat-square)
 
----
-
-## Para quem é este sistema?
-
-- **Escritórios de advocacia** que gerenciam contratos de clientes e contratos internos
-- **Departamentos jurídicos corporativos** com portfólios de contratos de fornecedores, locação, serviços e parcerias
-- **Gestores** que precisam de visibilidade sobre prazos e valores contratuais sem depender da equipe jurídica para cada consulta
+</div>
 
 ---
 
-## Funcionalidades
+## 📸 Telas do Sistema
+
+> _Adicione as capturas de tela abaixo. Salve os arquivos na pasta `docs/screenshots/` do repositório e substitua os blocos indicados._
+
+<br/>
+
+**🔐 Tela de Login**
+<!-- Após salvar a imagem, substitua a linha abaixo: -->
+<!-- ![Login](docs/screenshots/login.png) -->
+
+<br/>
+
+**📊 Dashboard**
+<!-- ![Dashboard](docs/screenshots/dashboard.png) -->
+
+<br/>
+
+**📄 Gestão de Contratos**
+<!-- ![Contratos](docs/screenshots/contratos.png) -->
+
+<br/>
+
+**🔔 Painel de Alertas**
+<!-- ![Alertas](docs/screenshots/alertas.png) -->
+
+<br/>
+
+**📝 Cadastro de Contrato**
+<!-- ![Cadastro](docs/screenshots/cadastro.png) -->
+
+---
+
+## 💡 O que é o Contractly?
+
+O Contractly é um sistema de gestão de contratos desenvolvido para eliminar o risco de vencimentos não monitorados. Em ambientes jurídicos, perder um prazo contratual pode gerar multas, rescisões indesejadas ou prejuízos financeiros significativos.
+
+O sistema centraliza todos os contratos em um único painel, automatiza os alertas de vencimento e garante que o responsável seja notificado no momento certo — sem depender de planilhas, lembretes manuais ou memória.
+
+---
+
+## 🎯 Para quem é este sistema?
+
+| Público | Necessidade atendida |
+|---|---|
+| ⚖️ **Escritórios de advocacia** | Gestão de contratos de clientes e contratos internos do escritório |
+| 🏢 **Departamentos jurídicos corporativos** | Portfólios de contratos de fornecedores, locação, serviços e parcerias |
+| 👔 **Gestores** | Visibilidade sobre prazos e valores sem depender da equipe jurídica para cada consulta |
+
+---
+
+## ✨ Funcionalidades
 
 ### 📊 Dashboard Executivo
 Visão consolidada do portfólio em tempo real. Ao fazer login, o usuário visualiza imediatamente quantos contratos estão ativos, quantos estão próximos do vencimento, quantos já venceram e o valor total e mensal sob gestão. Os contratos mais críticos são listados diretamente na tela inicial.
@@ -43,67 +91,114 @@ Registro automático de todas as ações realizadas no sistema: criação, ediç
 
 ---
 
-## Como funciona — Workflow principal
+## 🔁 Como funciona — Workflow principal
 
 ```
-1. Cadastro do contrato
-   └── Usuário informa os dados e define o prazo de alerta (ex: 30 dias antes)
+┌─────────────────────────────────────────────────────────────┐
+│                    CICLO DE VIDA DO CONTRATO                │
+└─────────────────────────────────────────────────────────────┘
 
-2. Sistema agenda o alerta
-   └── Um alerta é criado internamente para a data calculada
+  📝 1. CADASTRO
+     └── Usuário informa os dados e define o prazo de alerta
+         Ex: "Alertar 45 dias antes do vencimento"
 
-3. Monitoramento automático
-   └── A cada hora, o sistema verifica todos os contratos
-   └── Quando o prazo chega, o alerta aparece no painel
+         ↓
 
-4. Notificação
-   └── E-mail enviado automaticamente ao responsável pelo contrato
+  🗓️  2. AGENDAMENTO
+     └── Sistema cria 1 alerta agendado para a data calculada
+         Ex: vencimento em 01/06 → alerta agendado para 17/04
 
-5. Ação e reconhecimento
-   └── Responsável toma a ação (renovar, contatar, etc.)
-   └── Clica em "Resolver" — alerta sai da fila ativa
+         ↓
 
-6. Decisão registrada
-   └── Renovação ou encerramento é registrado com histórico
-   └── Novo alerta criado automaticamente para o próximo período
+  🔍 3. MONITORAMENTO AUTOMÁTICO
+     └── A cada hora, o sistema verifica todos os contratos
+     └── Quando o prazo chega, o alerta aparece no painel
+
+         ↓
+
+  📧 4. NOTIFICAÇÃO
+     └── E-mail enviado automaticamente ao responsável
+     └── Alerta visível no painel com prioridade calculada
+
+         ↓
+
+  ✅ 5. AÇÃO E RECONHECIMENTO
+     └── Responsável toma a ação necessária
+         (renovar, contatar a contraparte, encerrar, etc.)
+     └── Clica em "Resolver" — alerta sai da fila ativa
+
+         ↓
+
+  📁 6. DECISÃO REGISTRADA
+     └── Renovação ou encerramento registrado com histórico
+     └── Se renovado: novo alerta criado automaticamente
+         para o próximo período de vigência
 ```
 
 ---
 
-## Perfis de acesso
+## 🚦 Status dos Contratos
 
-| Perfil | O que pode fazer |
+| Status | Quando ocorre | Ação recomendada |
+|---|---|---|
+| 🟢 **Ativo** | Vigente, sem alertas críticos | Monitorar normalmente |
+| 🟡 **Vencendo** | Menos de 30 dias para vencer | Iniciar processo de renovação |
+| 🔴 **Vencido** | Data de vencimento ultrapassada | Regularizar urgentemente |
+| ⚫ **Cancelado** | Encerrado manualmente | Nenhuma |
+
+---
+
+## 👤 Perfis de Acesso
+
+| Perfil | Permissões |
 |---|---|
-| **Admin** | Acesso total: contratos, usuários, auditoria, confidenciais |
-| **Jurídico** | Criar e editar contratos, ver todos os alertas, registrar renovações |
-| **Gestor** | Visualizar contratos e alertas do seu departamento |
-| **Viewer** | Somente visualização dos contratos permitidos |
+| 🔑 **Admin** | Acesso total: contratos, usuários, auditoria, confidenciais |
+| ⚖️ **Jurídico** | Criar e editar contratos, ver todos os alertas, registrar renovações |
+| 👔 **Gestor** | Visualizar contratos e alertas do seu departamento |
+| 👁️ **Viewer** | Somente visualização dos contratos permitidos |
 
 ---
 
-## Por que o Contractly é útil para o negócio jurídico?
+## 📌 Por que o Contractly é útil para o negócio jurídico?
 
-**Redução de risco operacional:** Prazos contratuais perdidos geram multas, renovações automáticas indesejadas e exposição legal. O sistema elimina esse risco com alertas automáticos configurados por contrato.
+> **⚠️ Redução de risco operacional**  
+> Prazos contratuais perdidos geram multas, renovações automáticas indesejadas e exposição legal. O sistema elimina esse risco com alertas automáticos configurados por contrato.
 
-**Visibilidade financeira:** O dashboard consolida o valor total e mensal de todos os contratos ativos, permitindo decisões informadas sobre renovações e cortes de custo.
+> **💰 Visibilidade financeira**  
+> O dashboard consolida o valor total e mensal de todos os contratos ativos, permitindo decisões informadas sobre renovações e cortes de custo.
 
-**Rastreabilidade e conformidade:** Todo o ciclo de vida de um contrato — cadastro, alertas, renovações, encerramentos — fica registrado com data, hora e usuário responsável, atendendo requisitos de auditoria interna e externa.
+> **📋 Rastreabilidade e conformidade**  
+> Todo o ciclo de vida de um contrato — cadastro, alertas, renovações, encerramentos — fica registrado com data, hora e usuário responsável, atendendo requisitos de auditoria interna e externa.
 
-**Trabalho colaborativo com segurança:** Múltiplos usuários acessam o sistema com permissões adequadas ao seu papel, sem risco de alterações indevidas ou acesso a informações confidenciais.
+> **🔒 Trabalho colaborativo com segurança**  
+> Múltiplos usuários acessam o sistema com permissões adequadas ao seu papel, sem risco de alterações indevidas ou acesso a informações confidenciais.
 
-**Menos dependência de planilhas:** Centraliza em um único lugar informações que normalmente ficam espalhadas em planilhas Excel, pastas de e-mail e agendas pessoais.
-
----
-
-## Tecnologias utilizadas
-
-**Backend:** Python · Flask  
-**Frontend:** HTML · CSS · JavaScript  
-**Banco de dados:** PostgreSQL  
-**Hospedagem:** Render  
-**Agendamento de alertas:** APScheduler  
-**Exportação PDF:** jsPDF
+> **📂 Menos dependência de planilhas**  
+> Centraliza em um único lugar informações que normalmente ficam espalhadas em planilhas Excel, pastas de e-mail e agendas pessoais.
 
 ---
 
-*Contractly — Gestão de Contratos Jurídicos*
+## 🛠️ Tecnologias
+
+![Python](https://img.shields.io/badge/Python-Flask-1d6a54?style=flat-square&logo=python&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-ES6-1d6a54?style=flat-square&logo=javascript&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-1d6a54?style=flat-square&logo=postgresql&logoColor=white)
+![Render](https://img.shields.io/badge/Hospedagem-Render-1d6a54?style=flat-square&logo=render&logoColor=white)
+
+| Camada | Stack |
+|---|---|
+| **Backend** | Python · Flask |
+| **Frontend** | HTML · CSS · JavaScript |
+| **Banco de dados** | PostgreSQL |
+| **Hospedagem** | Render |
+| **Agendamento de alertas** | APScheduler |
+| **Exportação PDF** | jsPDF |
+
+---
+
+<div align="center">
+
+**Contractly — Gestão de Contratos Jurídicos**  
+*Nunca mais perca um prazo contratual.*
+
+</div>
