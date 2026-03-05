@@ -528,7 +528,11 @@ def dashboard():
     ).count()
     total_value   = db.session.query(func.sum(Contract.value_total)).filter(Contract.status.in_(['active', 'expiring'])).scalar() or 0
     monthly_value = db.session.query(func.sum(Contract.value_monthly)).filter(Contract.status.in_(['active', 'expiring'])).scalar() or 0
-    pending_alerts = Alert.query.filter(Alert.status.in_(['pending', 'sent']), Alert.acknowledged_at.is_(None)).count()
+    pending_alerts = Alert.query.filter(
+        Alert.status.in_(['pending', 'sent']),
+        Alert.acknowledged_at.is_(None),
+        Alert.trigger_date <= date.today()
+    ).count()
 
     by_type = db.session.query(Contract.contract_type, func.count(Contract.id))\
         .filter(Contract.status != 'cancelled').group_by(Contract.contract_type).all()
@@ -686,6 +690,8 @@ def delete_contract(cid):
 @require_auth
 def list_alerts():
     q = Alert.query.join(Contract)
+    # Só exibir alertas cuja data de disparo já chegou
+    q = q.filter(Alert.trigger_date <= date.today())
     if request.args.get('status'):   q = q.filter(Alert.status == request.args['status'])
     if request.args.get('priority'): q = q.filter(Alert.priority == request.args['priority'])
     if g.user_role not in ('admin', 'legal'):
