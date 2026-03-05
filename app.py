@@ -426,17 +426,14 @@ def run_alert_engine():
                 db.session.commit()
 
             for alert_days in DEFAULT_ALERT_DAYS:
-                if days > alert_days:
+                # Só dispara quando hoje é o dia exato do marco (±1 dia de tolerância)
+                if not (alert_days - 1 <= days <= alert_days + 1):
                     continue
+                # Verifica se já existe alerta para este marco neste contrato
                 existing = Alert.query.filter_by(
-                    contract_id=contract.id, days_before=alert_days, status='sent'
+                    contract_id=contract.id, days_before=alert_days
                 ).first()
                 if existing:
-                    continue
-                today_sent = Alert.query.filter_by(
-                    contract_id=contract.id, days_before=alert_days, trigger_date=today
-                ).first()
-                if today_sent:
                     continue
 
                 alert = Alert(
@@ -463,18 +460,29 @@ def run_alert_engine():
 
 
 def _create_default_alerts(contract):
+    """Cria os alertas futuros ao cadastrar um contrato.
+    Cada marco (90/60/30/15/7/1 dias) gera apenas 1 alerta,
+    somente se a data-gatilho ainda não passou.
+    """
     today = date.today()
     for days in DEFAULT_ALERT_DAYS:
         trigger = contract.end_date - timedelta(days=days)
-        if trigger >= today:
-            db.session.add(Alert(
-                contract_id=contract.id, alert_type='expiration',
-                days_before=days, trigger_date=trigger,
-                event_date=contract.end_date,
-                title=f"Contrato vence em {days} dia(s)",
-                message=f"O contrato '{contract.title}' vence em {days} dias.",
-                status='pending', priority=get_priority(days),
-            ))
+        if trigger < today:
+            continue  # marco já passou, não criar
+        # Evitar duplicata se função for chamada duas vezes
+        exists = Alert.query.filter_by(
+            contract_id=contract.id, days_before=days
+        ).first()
+        if exists:
+            continue
+        db.session.add(Alert(
+            contract_id=contract.id, alert_type='expiration',
+            days_before=days, trigger_date=trigger,
+            event_date=contract.end_date,
+            title=f"Contrato vence em {days} dia(s)",
+            message=f"O contrato '{contract.title}' vence em {days} dias.",
+            status='pending', priority=get_priority(days),
+        ))
     db.session.commit()
 
 
