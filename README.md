@@ -1,3 +1,6 @@
+<p align="center">
+  <img src="./frontend/statics/imgs/logo.png" alt="logo" width="100"/>
+</p>
 
 
 # Contractly
@@ -22,7 +25,7 @@ Controle prazos, receba alertas automáticos e mantenha um histórico auditável
 
 **🔐 Dashboard**
 
-<!-- ![Login](frontend/static/imgs/dash.png) -->
+<img src="./frontend/statics/imgs/dashboard.png" width="500" alt="Dashboard"/>
 
 <br/>
 
