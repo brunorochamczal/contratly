@@ -154,11 +154,10 @@ body {
 
 /* Logo no sidebar */
 .sidebar-logo-img {
-  width: 140px;
+  width: 120px;
   height: auto;
   display: block;
   margin: 0 auto;
-  filter: brightness(10);  /* logo branca sobre fundo escuro */
 }
 
 /* Logo no login */
@@ -235,17 +234,19 @@ textarea { resize: vertical; min-height: 80px; }
 /* ── SIDEBAR ── */
 .sidebar {
   width: 240px; min-width: 240px;
+  height: 100vh;
   background: #1d6a54;
   border-right: none;
   display: flex; flex-direction: column;
-  overflow-y: auto;
+  overflow: hidden;
   box-shadow: 4px 0 20px rgba(29,106,84,0.25);
+  flex-shrink: 0;
 }
 
 .sidebar-header {
-  padding: 24px 16px 20px;
+  padding: 16px;
   border-bottom: 1px solid rgba(255,255,255,0.12);
-  display: flex; align-items: center; gap: 10px;
+  display: flex; align-items: center; justify-content: center;
 }
 
 .sidebar-logo-icon {
@@ -268,22 +269,23 @@ textarea { resize: vertical; min-height: 80px; }
 }
 
 .sidebar-nav {
-  padding: 12px 8px; flex: 1;
+  padding: 8px; flex: 1;
+  overflow: hidden;
 }
 
 .nav-section-label {
   font-family: var(--font-mono);
   font-size: 9px; color: rgba(255,255,255,0.40);
   text-transform: uppercase; letter-spacing: 1.5px;
-  padding: 8px 8px 4px; margin-top: 8px;
+  padding: 4px 8px 2px; margin-top: 4px;
 }
 
 .nav-item {
   display: flex; align-items: center; gap: 10px;
-  padding: 9px 10px; border-radius: var(--radius);
+  padding: 7px 10px; border-radius: var(--radius);
   cursor: pointer; transition: all 0.15s;
   color: rgba(255,255,255,0.65); font-size: 13px;
-  margin-bottom: 2px; user-select: none;
+  margin-bottom: 1px; user-select: none;
   position: relative;
 }
 .nav-item:hover { background: rgba(255,255,255,0.10); color: #fff; }
@@ -308,8 +310,9 @@ textarea { resize: vertical; min-height: 80px; }
 .nav-badge.info { background: var(--accent); }
 
 .sidebar-footer {
-  padding: 12px 8px;
+  padding: 10px 8px;
   border-top: 1px solid rgba(255,255,255,0.12);
+  flex-shrink: 0;
 }
 
 .user-card {
@@ -329,8 +332,8 @@ textarea { resize: vertical; min-height: 80px; }
 }
 
 .user-info { flex: 1; overflow: hidden; }
-.user-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.user-role { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
+.user-name { font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-role { font-size: 10px; color: rgba(255,255,255,0.55); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 1px; }
 
 /* ── MAIN CONTENT ── */
 .main {
