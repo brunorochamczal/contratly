@@ -1,6 +1,4 @@
-<img width="1915" height="860" alt="image" src="https://github.com/user-attachments/assets/171368f2-9e49-4d68-8b91-94c2fc513932" /><div align="center">
 
-<img src="docs/screenshots/logo.png" alt="Contractly" width="180"/>
 
 # Contractly
 ### Gestão de Contratos Jurídicos
